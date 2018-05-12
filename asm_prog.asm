@@ -1,10 +1,14 @@
 global _start 
 SECTION .data 
 
+ Meow_start	db	 " /\_/\",10,"(<o.o>)",10," )=*=(",10,"(\|.|/)~~**",10,"Meow ^^", 10
+ Meow_len equ $ - Meow_start
  out_print	db	">>> Output: " 
- print_reg	dq 	0
- end_reg		db 	10
  length	equ	$ - out_print
+ my_enter	db	10
+ ten			dq	0
+ cur_per		dq	0
+ cur_byte		dq	0
  faker1 dq 0
  faker2 dq 0
  faker3 dq 0
@@ -108,80 +112,179 @@ SECTION .data
 
 SECTION .text 
 
+;====================== ascii --> 10-razr ===============================;
+;!! Input:	cur_per = curren peremennaya
+;!!	Exit: 	Printf 10razr
+;!!	Destroy:	rax, rbx, rdx, rsi, r13
+;========================================================================;
+;rdx:rax / rbx = rax (ost. rdx)
+
+T_create:
+
+		xor r13, r13
+		xor r15, r15
+		mov qword [ten], 0
+
+		mov rax, qword [cur_per]					; Get symbol
+		mov rbx, 0ah			
+
+T_start:
+		xor rdx, rdx
+		mov rbx, 0ah
+		div rbx								; Get fir cifra
+		add r15, 1
+
+		cmp rax, 0h							; if end of num
+		je T_end							; break
+
+		add [ten], rdx
+		mov r14, qword [ten]
+		shl r14, 3
+		add r14, [ten]
+		add r14, [ten]
+		mov qword [ten], r14
+											; push nums into stack
+		jmp T_start
+T_end:		
+
+		add [ten], rdx
+		mov r14, qword [ten]
+		shl r14, 3
+		add r14, [ten]
+		add r14, [ten]
+		mov qword [ten], r14
+
+		add r15, 1
+		
+;----------
+
+		mov rax, qword [ten]					; Get symbol
+		
+
+T_1start:
+		xor rdx, rdx
+		mov rbx, 0ah
+		div rbx								; Get fir cifra
+		sub r15, 1
+
+		cmp r15, 0h							; if end of num
+		je T_1end							; break
+
+		mov qword [cur_per], rax
+
+		cmp r13, 0
+		je T_fir_per
+
+		add rdx, '0'
+		mov qword [cur_byte], rdx
+		mov rcx, cur_byte
+		mov rax, 4  	; rax = 4
+		mov rbx, 1		; where write? (in terminal)
+		mov rdx, 1		; len of write
+		int 80h
+
+T_fir_per:
+		mov r13, 1488
+											; push nums into stack
+
+		mov rax, qword [cur_per]
+
+		jmp T_1start
+T_1end:		
+
+;----------
+
+		add rdx, '0'
+		mov qword [cur_byte], rdx
+		mov rcx, cur_byte
+		mov rax, 4  	; rax = 4
+		mov rbx, 1		; where write? (in terminal)
+		mov rdx, 1		; len of write
+		int 80h
+
+		ret
+
+
 _start:
 
 jump0:
- push 23
-
-jump1:
- push 22
+ push 1
 
 jump2:
- pop rax
- mov [faker1], rax
-
-jump3:
- pop rax
- mov [faker15], rax
+ push 1
 
 jump4:
-jump5:
- mov rax, [faker15]
- push rax
-jump6:
- pop rbx
- add rbx, [faker1]
- push rbx
-
-jump7:
- push 2
-
-jump8:
- pop rbx
- pop rax
- mul rbx
- push rax 
-
-jump9:
- push 10
-
-jump10:
- pop rbx
- pop rax
- div rbx
- push rax 
-
-jump11:
- push 39
-
-jump12:
- mov rax, [faker2]
- mov rbx, [faker2]
- cmp rax, rbx
- je jump14
-
-jump13:
- push 49
-
-jump14:
  pop rbx
  pop rax
  add rax, rbx
  push rax 
 
-jump15:
+jump5:
+ pop rax
+ mov [faker2], rax
+
+jump7:
+ push jump9
+ jmp jump15
+
+jump9:
+jump11:
+ mov rax, [faker4]
+ push rax
+
  pop rcx
- mov [print_reg], rcx
+ mov [cur_per], rcx
  mov rcx, out_print
  mov rax, 4
  mov rbx, 1
  mov rdx, length
  int 80h
+ call T_create
+ mov rcx, my_enter
+ mov rax, 4
+ mov rbx, 1
+ mov rdx, 1
+ int 80h
 
-jump16:
+jump12:
+jump13:
+jmp all_end 
+;!!! NOT MAIN FUNCTION UNDER !!!;
+
+ mov rcx, Meow_start
+ mov rax, 4
+ mov rbx, 1
+ mov rdx, Meow_len
+ int 80h
+
+jump14:
+ mov rcx, Meow_start
+ mov rax, 4
+ mov rbx, 1
+ mov rdx, Meow_len
+ int 80h
+
+jump15:
 jump17:
-jump18:
+ mov rax, [faker2]
+ push rax
+
+ push 4
+
 jump19:
+ pop rbx
+ pop rax
+ mul rbx
+ push rax 
+
+jump20:
+ pop rax
+ mov [faker4], rax
+
+jump22:
+ ret
+jump24:
+all_end:
  xor rbx, rbx
  mov rax, 1
  int 80h

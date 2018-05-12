@@ -17,11 +17,11 @@ const int Add = 3; //
 const int Mul = 4; //
 const int Sub = 5; //
 const int Div = 6; //
-const int Jum = 7; 
+const int Jum = 7; //
 const int Push_reg = 8; //
 const int Pop_reg = 9; //
 
-const int Meow = 33;
+const int Meow = 33; //
 
 const int Fcall = 51;
 const int Fret = 52;
